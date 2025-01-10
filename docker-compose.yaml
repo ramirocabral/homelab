@@ -1,0 +1,27 @@
+include:
+  - path: qbittorrent/docker-compose.yaml
+  - path: jellyfin/docker-compose.yaml
+  - path: pihole/docker-compose.yaml
+  - path: prowlarr/docker-compose.yaml
+  - path: radarr/docker-compose.yaml
+  - path: sonarr/docker-compose.yaml
+  - path: bazarr/docker-compose.yaml
+  - path: jdownloader2/docker-compose.yaml
+  - path: nginx/docker-compose.yaml
+  - path: homepage/docker-compose.yaml
+
+networks:
+  srv:
+    driver: bridge
+
+volumes:
+  warez:
+    driver_opts:
+      type: cifs
+      o: "username=guest,password=guest,vers=3.0,uid=1000,gid=1000"
+      device: ${WAREZ_ROOT}
+  data:
+    driver_opts:
+      type: cifs
+      o: "username=${SMB_USERNAME},password=${SMB_PASSWORD},vers=3.0,uid=1000,gid=1000"
+      device: ${DATA_ROOT}

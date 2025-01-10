@@ -1,0 +1,13 @@
+services:
+  jdownloader-2:
+    image: jlesage/jdownloader-2
+    container_name : jdownloader2
+    networks:
+      - srv
+    ports:
+      - "5800"
+      - "3129:3129/tcp"
+    volumes:
+      - "./config:/config:rw"
+      - "data:/data:rw"
+    restart: "unless-stopped"

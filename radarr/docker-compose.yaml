@@ -1,0 +1,16 @@
+services:
+  radarr:
+    container_name: radarr
+    image: lscr.io/linuxserver/radarr:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Buenos_Aires
+    volumes:
+      - "./config:/config"
+      - "warez:/data/"
+    networks:
+      - srv
+    ports:
+      - 7878
+    restart: unless-stopped

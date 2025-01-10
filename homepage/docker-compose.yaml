@@ -1,0 +1,16 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      PUID: 1000
+      PGID: 1000
+    env_file: .env
+    networks:
+      - srv
+    ports:
+      - 3000
+    volumes:
+      - ./config:/app/config
+      - ./data/images:/app/public/images
+    restart: unless-stopped

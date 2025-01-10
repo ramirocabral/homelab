@@ -1,0 +1,19 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: 1000:1000
+    ports:
+      - "8096/tcp"
+      - "8920:8920/tcp"
+      - "1900:1900/udp"
+      - "7359:7359/udp"
+    networks:
+      - srv
+    volumes:
+      - "./config:/config"
+      - "./data/cache:/cache"
+      - "warez:/media/"
+    environment:
+      - "TZ=America/Buenos_Aires"
+    restart: unless-stopped

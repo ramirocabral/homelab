@@ -1,0 +1,23 @@
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80/tcp"
+    dns:
+      - 127.0.0.1
+      - 8.8.8.8
+    environment:
+      TZ: "America/Buenos_Aires"
+      WEBPASSWORD: "password"
+      DHCP_ACTIVE: "false"
+      PIHOLE_DNS_: "1.1.1.1;8.8.8.8"
+    volumes:
+      - "./conf/etc-pihole/:/etc/pihole/"
+      - "./conf/etc-dnsmasq.d/:/etc/dnsmasq.d/"
+      - "./lighttpd.conf:/etc/lighttpd/lighttpd.conf"
+    networks:
+      - "srv"
+    restart: "unless-stopped"
