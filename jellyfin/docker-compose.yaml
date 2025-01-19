@@ -3,6 +3,8 @@ services:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
     user: 1000:1000
+    group_add:
+      - "993"
     ports:
       - "8096/tcp"
       - "8920:8920/tcp"
@@ -14,6 +16,8 @@ services:
       - "./config:/config"
       - "./data/cache:/cache"
       - "warez:/media/"
+    devices:
+      - "/dev/dri/renderD128:/dev/dri/renderD128"
     environment:
       - "TZ=America/Buenos_Aires"
     restart: unless-stopped
