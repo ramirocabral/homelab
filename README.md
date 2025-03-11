@@ -16,6 +16,7 @@ Services I run in my homelab.
 - [x] [Bazarr](./bazarr)
 - [x] [Prowlarr](./prowlarr)
 - [x] [Jellyfin](./jellyfin)
+- [x] [goDashboard](./go-dashboard)
 
 
 ## Environment Variables
