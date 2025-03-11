@@ -9,6 +9,7 @@ include:
   - path: jdownloader2/docker-compose.yaml
   - path: nginx/docker-compose.yaml
   - path: homepage/docker-compose.yaml
+  - path: go-dashboard/docker-compose.yaml
 
 networks:
   srv:
