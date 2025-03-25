@@ -10,6 +10,8 @@ include:
   - path: nginx/docker-compose.yaml
   - path: homepage/docker-compose.yaml
   - path: go-dashboard/docker-compose.yaml
+  - path: pinchflat/docker-compose.yaml
+  - path: cupsd/docker-compose.yaml
 
 networks:
   srv:

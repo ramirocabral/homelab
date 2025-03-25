@@ -1,0 +1,12 @@
+services:
+  cupsd:
+    container_name: cupsd
+    image: olbat/cupsd
+    ports:
+      - "631:631"
+    volumes:
+      - /var/run/dbus:/var/run/dbus
+      - ./config/cupsd.conf:/etc/cups/cupsd.conf
+    networks:
+      - srv
+    restart: always
