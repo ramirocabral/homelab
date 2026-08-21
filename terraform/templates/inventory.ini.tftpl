@@ -1,0 +1,19 @@
+[server]
+%{ for name, n in nodes ~}
+%{ if n.role == "server" ~}
+${name} ansible_host=${n.ip} k3s_taint=${n.taint} longhorn_data=${n.data_disk != null}
+%{ endif ~}
+%{ endfor ~}
+[agent]
+%{ for name, n in nodes ~}
+%{ if n.role == "agent" ~}
+${name} ansible_host=${n.ip} k3s_taint=${n.taint} longhorn_data=${n.data_disk != null}
+%{ endif ~}
+%{ endfor ~}
+[k3s_cluster:children]
+server
+agent
+
+[k3s_cluster:vars]
+ansible_user=${ssh_user}
+k3s_server_ip=${server_ip}

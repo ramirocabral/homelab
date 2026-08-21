@@ -1,0 +1,57 @@
+---
+- name: Disable swap now
+  ansible.builtin.command: swapoff -a
+  changed_when: false
+
+- name: Comment out swap entries in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\s+swap\s+.*)$'
+    replace: '# \1'
+
+- name: Load kernel modules on boot
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/k3s.conf
+    content: |
+      overlay
+      br_netfilter
+    mode: "0644"
+
+- name: Ensure modules are loaded now
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Kernel networking sysctls for kubernetes
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/99-k3s.conf
+    reload: true
+  loop:
+    - { name: net.ipv4.ip_forward, value: "1" }
+    - { name: net.bridge.bridge-nf-call-iptables, value: "1" }
+    - { name: net.bridge.bridge-nf-call-ip6tables, value: "1" }
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - qemu-guest-agent
+      - curl
+      - ca-certificates
+    state: present
+    update_cache: true
+
+- name: Check for the QEMU guest-agent virtio channel
+  ansible.builtin.stat:
+    path: /dev/virtio-ports/org.qemu.guest_agent.0
+  register: qga_channel
+
+- name: Enable qemu-guest-agent (start only if its channel exists)
+  ansible.builtin.service:
+    name: qemu-guest-agent
+    enabled: true
+    state: "{{ 'started' if qga_channel.stat.exists else omit }}"

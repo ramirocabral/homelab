@@ -1,0 +1,9 @@
+---
+# Components we let k3s ship are disabled because the homelab brings its own:
+#   traefik       -> own ingress + cert-manager
+#   servicelb     -> Cilium LB-IPAM (or MetalLB)
+#   local-storage -> Longhorn
+k3s_disable:
+  - traefik
+  - servicelb
+  - local-storage

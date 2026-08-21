@@ -1,0 +1,45 @@
+---
+- name: Install Longhorn node dependencies
+  ansible.builtin.apt:
+    name:
+      - open-iscsi
+      - nfs-common
+    state: present
+    update_cache: true
+
+- name: Enable iscsid
+  ansible.builtin.service:
+    name: iscsid
+    enabled: true
+    state: started
+
+- name: Load iscsi_tcp on boot
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/iscsi.conf
+    content: "iscsi_tcp\n"
+    mode: "0644"
+
+- name: Ensure iscsi_tcp is loaded now
+  community.general.modprobe:
+    name: iscsi_tcp
+    state: present
+
+- name: Create ext4 filesystem on the Longhorn data disk
+  community.general.filesystem:
+    fstype: ext4
+    dev: "{{ longhorn_device }}"
+    # never reformat a disk that already carries a filesystem.
+    force: false
+
+- name: Get UUID of the Longhorn data disk
+  ansible.builtin.command: "blkid -s UUID -o value {{ longhorn_device }}"
+  register: longhorn_uuid
+  changed_when: false
+
+- name: Mount the Longhorn data disk by UUID
+  ansible.posix.mount:
+    path: "{{ longhorn_data_dir }}"
+    src: "UUID={{ longhorn_uuid.stdout }}"
+    fstype: ext4
+    opts: defaults,discard
+    state: mounted

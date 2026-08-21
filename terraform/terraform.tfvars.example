@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars and fill in the real secrets.
+# Everything that is not a secret lives in fleet.auto.tfvars, which is committed.
+
+# Generate on the PVE node with:
+#   pveum user token add terraform-prov@pve provider --privsep 0
+pve_api_token = "terraform-prov@pve!provider=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# ---- Proxmox Backup Server on TrueNAS ----
+pbs_datastore   = "backups"                          # datastore name on the PBS side
+pbs_fingerprint = "AA:BB:CC:...:FF"                  # PBS UI -> Show Fingerprint
+pbs_username    = "pve@pbs!backup"                   # API token id
+pbs_password    = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx" # token secret

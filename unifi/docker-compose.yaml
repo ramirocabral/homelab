@@ -1,0 +1,40 @@
+services:
+  unifi-db:
+    image: docker.io/library/mongo:8.0
+    container_name: unifi-db
+    network_mode: host
+    command: ["--bind_ip", "127.0.0.1", "--port", "27017"]
+    environment:
+      # Consumed by init-mongo.sh on FIRST START ONLY (empty /data/db).
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASS=${MONGO_PASS}
+      - MONGO_DBNAME=${MONGO_DBNAME}
+      - MONGO_AUTHSOURCE=${MONGO_AUTHSOURCE}
+    volumes:
+      - ./data/db:/data/db
+      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+    restart: unless-stopped
+
+  unifi:
+    image: lscr.io/linuxserver/unifi-network-application:10.5.67
+    container_name: unifi
+    network_mode: host
+    depends_on:
+      - unifi-db
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Argentina/Buenos_Aires
+      - MONGO_HOST=127.0.0.1
+      - MONGO_PORT=27017
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASS=${MONGO_PASS}
+      - MONGO_DBNAME=${MONGO_DBNAME}
+      - MONGO_AUTHSOURCE=${MONGO_AUTHSOURCE}
+      - MEM_LIMIT=1024
+      - MEM_STARTUP=1024
+    volumes:
+      - ./config:/config
+    restart: unless-stopped

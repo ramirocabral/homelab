@@ -1,0 +1,54 @@
+---
+- name: Build k3s server exec args
+  ansible.builtin.set_fact:
+    k3s_exec: >-
+      server
+      --flannel-backend=none
+      --disable-network-policy
+      --disable-kube-proxy
+      {% for c in k3s_disable %}--disable {{ c }} {% endfor %}
+      --write-kubeconfig-mode 644
+      --tls-san {{ k3s_server_ip }}
+      {% if k3s_taint | bool %}--node-taint node-role.kubernetes.io/control-plane=true:NoSchedule{% endif %}
+
+- name: Download k3s installer
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /usr/local/bin/k3s-install.sh
+    mode: "0755"
+
+- name: Install k3s server
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s-install.sh
+    creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_CHANNEL: "{{ k3s_channel }}"
+    INSTALL_K3S_EXEC: "{{ k3s_exec }}"
+
+- name: Wait for the node-token to appear
+  ansible.builtin.wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+    timeout: 120
+
+- name: Read the node-token
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_token_b64
+
+- name: Expose the node-token as a host fact (agents read it via hostvars)
+  ansible.builtin.set_fact:
+    k3s_node_token: "{{ k3s_token_b64.content | b64decode | trim }}"
+
+- name: Fetch kubeconfig to the control machine
+  ansible.builtin.fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ playbook_dir }}/kubeconfig"
+    flat: true
+
+- name: Rewrite kubeconfig server URL to the node IP (not 127.0.0.1)
+  ansible.builtin.replace:
+    path: "{{ playbook_dir }}/kubeconfig"
+    regexp: 'https://127\.0\.0\.1:6443'
+    replace: "https://{{ k3s_server_ip }}:6443"
+  delegate_to: localhost
+  become: false

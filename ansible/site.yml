@@ -1,0 +1,31 @@
+---
+# k3s cluster bring-up. Order matters: prep every node, prepare storage on the
+# worker, stand up the server, then join agents. The CNI (Cilium) and the rest
+# of the add-ons are installed afterwards via Helm (see the plan), not here.
+
+- name: Common node preparation
+  hosts: k3s_cluster
+  pre_tasks:
+    # Freshly cloned VMs may still be finishing cloud-init when Terraform hands
+    # off, so wait for SSH before the first task instead of failing "unreachable".
+    - name: Wait for SSH to come up
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+  roles:
+    - common
+
+- name: Longhorn storage prerequisites (nodes with a data disk)
+  hosts: agent
+  roles:
+    - role: storage
+      when: longhorn_data | bool
+
+- name: k3s control-plane (server)
+  hosts: server
+  roles:
+    - k3s_server
+
+- name: k3s workers (agents)
+  hosts: agent
+  roles:
+    - k3s_agent
