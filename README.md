@@ -49,16 +49,6 @@ Leaves the kubeconfig at `ansible/kubeconfig` (not committed).
 **4. Add-ons and applications.** Cilium, Longhorn, ingress-nginx and cert-manager are
 installed after the playbook — see `ansible/README.md`. From there on, Argo CD is in charge.
 
-## Services outside the cluster
-
-Some services don't live in k8s but are still provisioned from here:
-
-- **Technitium**: the lab's split-horizon DNS.
-- **proxy**: nginx with Let's Encrypt certs over DNS-01, fronting appliances that
-  only speak self-signed HTTPS (PVE, TrueNAS). See `proxy/`.
-- **UniFi**: the AP controller, on Docker Compose. It sits outside
-  k8s because it has to share the same L2 as the APs. See `unifi/`.
-
 ## Commands
 
 ```
