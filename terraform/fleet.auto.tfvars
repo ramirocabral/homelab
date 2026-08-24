@@ -56,6 +56,7 @@ vms = {
   unifi = {
     vm_id   = 112
     cores   = 2
+    node    = "pve02"
     memory  = 4096
     os_disk = 20
     ip      = "192.168.9.55"
