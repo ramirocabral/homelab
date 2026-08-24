@@ -3,7 +3,7 @@ module "k3s_node" {
   for_each = var.k3s_nodes
 
   name        = "k3s-${each.key}"
-  node_name   = var.node_name
+  node_name   = local.k3s_node[each.key]
   vm_id       = each.value.vm_id
   template_id = var.vm_template_id
 

@@ -3,9 +3,9 @@ module "lxc" {
   for_each = var.containers
 
   name             = each.key
-  node_name        = var.node_name
+  node_name        = local.container_node[each.key]
   vm_id            = each.value.vm_id
-  template_file_id = proxmox_download_file.lxc_template.id
+  template_file_id = proxmox_download_file.lxc_template[local.container_node[each.key]].id
 
   cores     = each.value.cores
   memory    = each.value.memory

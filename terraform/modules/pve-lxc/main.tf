@@ -73,6 +73,6 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   lifecycle {
-    ignore_changes = [pool_id]
+    ignore_changes = [pool_id, features]
   }
 }

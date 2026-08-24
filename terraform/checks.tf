@@ -22,9 +22,16 @@ check "known_resolvers" {
   }
 }
 
-check "lab_resolver_is_static" {
+check "known_nodes" {
   assert {
-    condition     = local.lab_resolver_ip != null
-    error_message = "The container named by var.lab_resolver needs a static ip; other guests point their DNS at it."
+    condition     = alltrue([for n in local.fleet_nodes : contains(var.pve_nodes, n)])
+    error_message = "Every guest node must be listed in var.pve_nodes: ${join(", ", var.pve_nodes)}."
+  }
+}
+
+check "lab_resolvers_are_static" {
+  assert {
+    condition     = alltrue([for ip in local.lab_resolver_ips : ip != null])
+    error_message = "Every container named by var.lab_resolvers needs a static ip; other guests point their DNS at them."
   }
 }

@@ -62,7 +62,7 @@ variable "unprivileged" {
 
 variable "nesting" {
   type        = bool
-  description = "Enable the nesting feature flag. Requires root@pam on the PVE API, so an API token cannot set it"
+  description = "Enable the nesting feature flag. Applied at creation only: changing flags later needs root@pam, so updates are ignored"
   default     = false
 }
 

@@ -18,6 +18,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   name      = var.name
   node_name = var.node_name
   vm_id     = var.vm_id
+  migrate   = var.migrate
   tags      = var.tags
   pool_id   = var.pool_id
 

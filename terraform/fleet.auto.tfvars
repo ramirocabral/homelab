@@ -1,8 +1,6 @@
-# The homelab, as data. This is the only file to edit when the fleet grows.
-# Credentials go in terraform.tfvars (gitignored).
-
 pve_endpoint = "https://192.168.9.7:8006/"
 node_name    = "pve"
+pve_nodes    = ["pve", "pve02"]
 lan_gateway  = "192.168.9.1"
 
 ssh_user            = "ramiro"
@@ -12,7 +10,7 @@ vm_template_id   = 9000
 lxc_template_url = "http://download.proxmox.com/images/system/debian-13-standard_13.6-1_amd64.tar.zst"
 
 dns_fallback_servers = ["1.1.1.1", "9.9.9.9"]
-lab_resolver         = "technitium"
+lab_resolvers        = ["ns1", "ns2"]
 
 pbs_server      = "192.168.9.50"
 backup_pool     = "prod"
@@ -30,12 +28,23 @@ containers = {
     tags     = ["proxy"]
   }
 
-  technitium = {
+  ns1 = {
     vm_id    = 111
     cores    = 1
     memory   = 1024
     disk     = 4
     ip       = "192.168.9.53"
+    resolver = "upstream"
+    tags     = ["dns"]
+  }
+
+  ns2 = {
+    vm_id    = 113
+    node     = "pve02"
+    cores    = 1
+    memory   = 1024
+    disk     = 4
+    ip       = "192.168.9.54"
     resolver = "upstream"
     tags     = ["dns"]
   }
@@ -79,6 +88,7 @@ k3s_nodes = {
 
   worker02 = {
     vm_id     = 123
+    node      = "pve02"
     ip        = "192.168.9.23"
     cores     = 2
     memory    = 8192

@@ -3,7 +3,7 @@ module "vm" {
   for_each = var.vms
 
   name        = each.key
-  node_name   = var.node_name
+  node_name   = local.vm_node[each.key]
   vm_id       = each.value.vm_id
   template_id = var.vm_template_id
 

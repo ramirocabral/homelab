@@ -16,7 +16,12 @@ variable "pve_api_token" {
 
 variable "node_name" {
   type        = string
-  description = "PVE node the guests run on"
+  description = "Default PVE node for guests that do not pin one"
+}
+
+variable "pve_nodes" {
+  type        = list(string)
+  description = "PVE nodes in the cluster; a guest node must be one of these"
 }
 
 # ---- Guest defaults ---------------------------------------------------------
@@ -51,9 +56,9 @@ variable "dns_fallback_servers" {
   description = "Public resolvers, used behind the lab resolver and by the lab resolver itself"
 }
 
-variable "lab_resolver" {
-  type        = string
-  description = "Key in var.containers of the container running the lab DNS server"
+variable "lab_resolvers" {
+  type        = list(string)
+  description = "Keys in var.containers of the containers running the lab DNS, in preference order"
 }
 
 # ---- Fleet ------------------------------------------------------------------
@@ -61,6 +66,7 @@ variable "lab_resolver" {
 variable "containers" {
   type = map(object({
     vm_id    = number
+    node     = optional(string)
     cores    = optional(number, 1)
     memory   = optional(number, 512)
     swap     = optional(number, 512)
@@ -76,6 +82,7 @@ variable "containers" {
 variable "vms" {
   type = map(object({
     vm_id      = number
+    node       = optional(string)
     cores      = optional(number, 2)
     memory     = optional(number, 2048)
     os_disk    = optional(number, 20)
@@ -90,6 +97,7 @@ variable "vms" {
 variable "k3s_nodes" {
   type = map(object({
     vm_id     = number
+    node      = optional(string)
     ip        = string
     cores     = optional(number, 2)
     memory    = optional(number, 4096)

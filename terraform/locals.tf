@@ -3,14 +3,19 @@ locals {
     trimspace(file(var.ssh_public_key_path)),
   ]
 
-  lab_resolver_ip = var.containers[var.lab_resolver].ip
+  # PVE node each guest lands on; null in the fleet means var.node_name.
+  container_node = { for k, c in var.containers : k => coalesce(c.node, var.node_name) }
+  vm_node        = { for k, v in var.vms : k => coalesce(v.node, var.node_name) }
+  k3s_node       = { for k, n in var.k3s_nodes : k => coalesce(n.node, var.node_name) }
+
+  lab_resolver_ips = [for k in var.lab_resolvers : var.containers[k].ip]
 
   # Named resolver profiles a guest can pick from:
   #   lab      -> lab DNS first, public upstreams as fallback
-  #   upstream -> public upstreams only (the lab resolver itself)
+  #   upstream -> public upstreams only (the lab resolvers themselves)
   #   host     -> inherit whatever the PVE host hands down
   resolvers = {
-    lab      = concat([local.lab_resolver_ip], var.dns_fallback_servers)
+    lab      = slice(concat(local.lab_resolver_ips, var.dns_fallback_servers), 0, 3)
     upstream = var.dns_fallback_servers
     host     = []
   }
@@ -27,6 +32,12 @@ locals {
     [for c in var.containers : c.ip],
     [for v in var.vms : v.ip],
     [for n in var.k3s_nodes : n.ip],
+  ))
+
+  fleet_nodes = distinct(concat(
+    values(local.container_node),
+    values(local.vm_node),
+    values(local.k3s_node),
   ))
 
   valid_resolvers = keys(local.resolvers)

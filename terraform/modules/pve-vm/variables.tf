@@ -108,3 +108,9 @@ variable "agent_enabled" {
   description = "Enable the QEMU guest agent. Keep false until it's installed in-guest."
   default     = false
 }
+
+variable "migrate" {
+  type        = bool
+  description = "Migrate the VM when node_name changes instead of destroying and re-creating it"
+  default     = true
+}
