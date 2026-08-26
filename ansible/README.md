@@ -18,7 +18,7 @@ ansible-galaxy collection install -r requirements.yml
 # 3) Connectivity
 ansible -m ping all
 
-# 4) Full bootstrap (common -> storage -> server -> agent)
+# 4) Full bootstrap (common -> gpu -> storage -> server -> agent -> labels)
 ansible-playbook site.yml
 ```
 
@@ -33,12 +33,18 @@ kubectl get nodes -o wide    # NotReady until Cilium is installed (expected)
 
 - **common** (all nodes): swap off, `overlay`/`br_netfilter` modules, network sysctls,
   `qemu-guest-agent`.
+- **gpu** (nodes with `igpu = true` only): Intel GPU firmware (`firmware-misc-nonfree`) and
+  VA-API userspace, GuC/HuC enabled, and asserts `/dev/dri/renderD128` is there — if it is not,
+  the iGPU was never attached (see `scripts/igpu-passthrough.sh` in the repo root). It also
+  asserts the `render` group is the gid the workloads assume (991 on these images), since that
+  number is what Jellyfin carries in `supplementalGroups`.
 - **storage** (workers with a data disk only): `open-iscsi` + `nfs-common` (Longhorn
   prerequisites), formats `/dev/sdb` (scsi1) and mounts it by UUID at `/var/lib/longhorn`.
 - **k3s_server** (master): installs k3s with `--flannel-backend=none --disable-kube-proxy`
   (CNI is Cilium) and `--disable traefik/servicelb/local-storage`; taints the control plane if
   the node declares it. Publishes the `node-token` and fetches the kubeconfig.
 - **k3s_agent** (workers): joins the server using that token.
+- **k3s_labels** (all nodes): reconciles the node labels the fleet declares.
 
 ## Afterwards (add-ons, via Helm — not in this playbook)
 
@@ -50,10 +56,16 @@ kubectl get nodes -o wide    # NotReady until Cilium is installed (expected)
 
 ## Notes
 
+- Node labels are applied with `kubectl label`, not with k3s' `--node-label`: kubelet only honours
+  that flag when the node first registers, so it would not pick up a label edited later. The role
+  adds, updates **and removes** every label under `node_label_domain`, which makes
+  `terraform/fleet.auto.tfvars` authoritative. Short cycle to change one: `make labels`.
 - The install task uses `creates: /usr/local/bin/k3s`, so it **never re-applies flags** on an
   already-installed node. To change k3s flags, run the uninstall script
   (`/usr/local/bin/k3s-*-uninstall.sh`) or edit the config and restart the service by hand.
 - The cloud-init user (`ramiro`) has passwordless sudo, which is why `become` never prompts.
-- The `storage` role assumes the data disk is `/dev/sdb`, which is the `scsi1` Terraform
-  attaches. If a node ever gets a second data disk that assumption breaks silently, and
-  `longhorn_device` has to be set per host.
+- The `storage` role addresses the data disk through `/dev/disk/by-id/`, never `/dev/sdX`.
+  Kernel flavours enumerate the SCSI disks in different orders (on the standard kernel `scsi1`
+  came up as `/dev/sda` and the OS disk as `/dev/sdb`), and attached Longhorn volumes show up as
+  `/dev/sdc` and beyond, so the short names point at different disks on different nodes. The
+  role also refuses to format a disk that has partitions.

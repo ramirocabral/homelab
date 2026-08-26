@@ -3,11 +3,17 @@ node_name    = "pve"
 pve_nodes    = ["pve", "pve02"]
 lan_gateway  = "192.168.9.1"
 
+node_label_domain = "cabral.net.ar"
+
 ssh_user            = "ramiro"
 ssh_public_key_path = "~/.ssh/id_ed25519.pub"
 
-vm_template_id   = 9000
 lxc_template_url = "http://download.proxmox.com/images/system/debian-13-standard_13.6-1_amd64.tar.zst"
+
+vm_template_ids = {
+  pve   = 9000
+  pve02 = 9001
+}
 
 dns_fallback_servers = ["1.1.1.1", "9.9.9.9"]
 lab_resolvers        = ["ns1", "ns2"]
@@ -83,7 +89,7 @@ k3s_nodes = {
     cores     = 2
     memory    = 8192
     os_disk   = 20
-    data_disk = 50
+    data_disk = 70
     role      = "agent"
   }
 
@@ -94,7 +100,23 @@ k3s_nodes = {
     cores     = 2
     memory    = 8192
     os_disk   = 20
-    data_disk = 50
+    data_disk = 70
     role      = "agent"
+  }
+
+  worker03 = {
+    vm_id     = 124
+    node      = "pve02"
+    ip        = "192.168.9.24"
+    cores     = 2
+    memory    = 8192
+    os_disk   = 20
+    data_disk = 70
+    role      = "agent"
+    igpu      = true
+    labels = {
+      gpu             = "intel-quicksync"
+      "quicksync-gen" = "kabylake"
+    }
   }
 }

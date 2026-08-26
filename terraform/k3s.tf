@@ -5,7 +5,7 @@ module "k3s_node" {
   name        = "k3s-${each.key}"
   node_name   = local.k3s_node[each.key]
   vm_id       = each.value.vm_id
-  template_id = var.vm_template_id
+  template_id = var.vm_template_ids[local.k3s_node[each.key]]
 
   cores            = each.value.cores
   memory           = each.value.memory
@@ -27,8 +27,10 @@ resource "local_file" "ansible_inventory" {
   filename        = "${path.module}/../ansible/inventory.ini"
   file_permission = "0644"
   content = templatefile("${path.module}/templates/inventory.ini.tftpl", {
-    nodes     = var.k3s_nodes
-    ssh_user  = var.ssh_user
-    server_ip = one([for n in var.k3s_nodes : n.ip if n.role == "server"])
+    nodes        = var.k3s_nodes
+    labels       = local.k3s_labels
+    label_domain = var.node_label_domain
+    ssh_user     = var.ssh_user
+    server_ip    = one([for n in var.k3s_nodes : n.ip if n.role == "server"])
   })
 }

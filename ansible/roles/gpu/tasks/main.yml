@@ -1,0 +1,47 @@
+---
+- name: Enable the non-free apt components
+  ansible.builtin.replace:
+    path: /etc/apt/sources.list.d/debian.sources
+    regexp: '^Components: main$'
+    replace: 'Components: main non-free-firmware non-free'
+  register: apt_components
+
+- name: Install the Intel GPU firmware and VA-API userspace
+  ansible.builtin.apt:
+    name:
+      - firmware-misc-nonfree
+      - intel-media-va-driver-non-free
+      - vainfo
+    state: present
+    update_cache: "{{ apt_components.changed }}"
+
+- name: Enable GuC and HuC
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/i915.conf
+    content: |
+      options i915 enable_guc=2
+    mode: "0644"
+  register: i915_options
+
+- name: Reboot into the new i915 options
+  ansible.builtin.reboot:
+  when: i915_options.changed
+
+- name: Check the render node exists
+  ansible.builtin.stat:
+    path: "{{ gpu_render_node }}"
+  register: render_node
+
+- name: Fail when the iGPU never arrived
+  ansible.builtin.assert:
+    that: render_node.stat.exists
+    fail_msg: >-
+      {{ gpu_render_node }} is missing: the iGPU is not attached to this VM.
+      Run scripts/igpu-passthrough.sh on the PVE host.
+
+- name: Check the render group matches what the workloads assume
+  ansible.builtin.assert:
+    that: render_node.stat.gid == gpu_render_gid
+    fail_msg: >-
+      render group is gid {{ render_node.stat.gid }}, not {{ gpu_render_gid }}:
+      update supplementalGroups in the Jellyfin values to match.

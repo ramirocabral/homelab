@@ -1,6 +1,6 @@
 TF := terraform -chdir=terraform
 
-.PHONY: help fmt validate plan apply inventory deps ping site
+.PHONY: help fmt validate plan apply inventory deps ping site labels
 
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t20
@@ -28,3 +28,7 @@ ping: ## Check every k3s node answers over SSH
 
 site: ## Bootstrap the k3s cluster on the provisioned VMs
 	cd ansible && ansible-playbook site.yml
+
+labels: ## Reconcile the k3s node labels from the Terraform fleet
+	$(TF) apply -target=local_file.ansible_inventory
+	cd ansible && ansible-playbook site.yml --tags labels

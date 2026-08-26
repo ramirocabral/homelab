@@ -1,7 +1,8 @@
 ---
-# k3s cluster bring-up. Order matters: prep every node, prepare storage on the
-# worker, stand up the server, then join agents. The CNI (Cilium) and the rest
-# of the add-ons are installed afterwards via Helm (see the plan), not here.
+# k3s cluster bring-up. Order matters: prep every node, hand the iGPU nodes their
+# drivers, prepare storage on the workers, stand up the server, join the agents,
+# and label them last, once the API is up. The CNI (Cilium) and the rest of the
+# add-ons are installed afterwards via Helm (see the README), not here.
 
 - name: Common node preparation
   hosts: k3s_cluster
@@ -13,6 +14,12 @@
         timeout: 300
   roles:
     - common
+
+- name: Intel iGPU nodes
+  hosts: agent
+  roles:
+    - role: gpu
+      when: igpu | bool
 
 - name: Longhorn storage prerequisites (nodes with a data disk)
   hosts: agent
@@ -29,3 +36,9 @@
   hosts: agent
   roles:
     - k3s_agent
+
+- name: Node labels
+  hosts: k3s_cluster
+  tags: labels
+  roles:
+    - k3s_labels

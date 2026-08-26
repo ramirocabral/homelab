@@ -8,6 +8,13 @@ locals {
   vm_node        = { for k, v in var.vms : k => coalesce(v.node, var.node_name) }
   k3s_node       = { for k, n in var.k3s_nodes : k => coalesce(n.node, var.node_name) }
 
+  k3s_labels = {
+    for k, n in var.k3s_nodes : k => merge(
+      { "${var.node_label_domain}/pve-node" = local.k3s_node[k] },
+      { for lk, lv in n.labels : "${var.node_label_domain}/${lk}" => lv },
+    )
+  }
+
   lab_resolver_ips = [for k in var.lab_resolvers : var.containers[k].ip]
 
   # Named resolver profiles a guest can pick from:

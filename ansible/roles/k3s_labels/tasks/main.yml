@@ -1,0 +1,24 @@
+---
+- name: Apply the labels declared in the fleet
+  ansible.builtin.command:
+    cmd: k3s kubectl label node k3s-{{ inventory_hostname }} {{ item }} --overwrite
+  delegate_to: "{{ groups['server'][0] }}"
+  loop: "{{ k3s_node_labels.split(',') }}"
+  register: labelled
+  changed_when: "'not labeled' not in labelled.stdout"
+
+- name: Read the labels back
+  ansible.builtin.command:
+    cmd: k3s kubectl get node k3s-{{ inventory_hostname }} -o jsonpath={.metadata.labels}
+  delegate_to: "{{ groups['server'][0] }}"
+  changed_when: false
+  register: node_labels
+
+- name: Drop the ones the fleet no longer declares
+  ansible.builtin.command:
+    cmd: k3s kubectl label node k3s-{{ inventory_hostname }} {{ item }}-
+  delegate_to: "{{ groups['server'][0] }}"
+  loop: >-
+    {{ (node_labels.stdout | from_json).keys()
+       | select('match', k3s_label_domain ~ '/')
+       | difference(k3s_node_labels.split(',') | map('split', '=') | map('first')) }}

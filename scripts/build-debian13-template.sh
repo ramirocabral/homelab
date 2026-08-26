@@ -20,12 +20,17 @@ set -euo pipefail
 : "${CI_PASSWORD:?set CI_PASSWORD for the cloud-init user password}"
 : "${SSH_PUBKEY:?set SSH_PUBKEY to the public key authorized for CIUSER}"
 
+case "$SSH_PUBKEY" in
+  ssh-*|ecdsa-*) ;;
+  *) echo "SSH_PUBKEY is not a public key, it is: $SSH_PUBKEY" >&2; exit 1 ;;
+esac
+
 VMID="${VMID:-9000}"
 NAME="${NAME:-debian-13-base}"
 STORAGE="${STORAGE:-local-lvm}"
 BRIDGE="${BRIDGE:-vmbr0}"
 CIUSER="${CIUSER:-ramiro}"
-IMG="${IMG:-debian-13-genericcloud-amd64.qcow2}"
+IMG="${IMG:-debian-13-generic-amd64.qcow2}"
 URL="${URL:-https://cloud.debian.org/images/cloud/trixie/latest/${IMG}}"
 WORKDIR="${WORKDIR:-/var/lib/vz/template/qcow}"
 

@@ -26,9 +26,9 @@ variable "pve_nodes" {
 
 # ---- Guest defaults ---------------------------------------------------------
 
-variable "vm_template_id" {
-  type        = number
-  description = "vmid of the cloud-init VM template to full-clone"
+variable "vm_template_ids" {
+  type        = map(number)
+  description = "PVE node -> vmid of the cloud-init VM template on it. Cloning is node-local (a template on local-lvm cannot be cloned across nodes) and vmids are cluster-unique, so every node running a VM needs its own"
 }
 
 variable "lxc_template_url" {
@@ -44,6 +44,11 @@ variable "ssh_user" {
 variable "ssh_public_key_path" {
   type        = string
   description = "Path to the SSH public key injected into every guest"
+}
+
+variable "node_label_domain" {
+  type        = string
+  description = "Domain prefix for the Kubernetes node labels this repo owns (e.g. example.com/pve-node)"
 }
 
 variable "lan_gateway" {
@@ -105,8 +110,10 @@ variable "k3s_nodes" {
     data_disk = optional(number) # GiB on scsi1 for Longhorn; null = none
     role      = string           # server | agent
     taint     = optional(bool, false)
+    igpu      = optional(bool, false)
+    labels    = optional(map(string), {})
   }))
-  description = "k3s cluster nodes, keyed by node name"
+  description = "k3s cluster nodes, keyed by node name. Label keys are prefixed with var.node_label_domain"
 
   validation {
     condition     = length([for n in var.k3s_nodes : n if n.role == "server"]) == 1

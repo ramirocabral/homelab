@@ -77,6 +77,6 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   # avoid destroying vm when pool_id changes
   lifecycle {
-    ignore_changes = [pool_id]
+    ignore_changes = [pool_id, hostpci, vga, clone]
   }
 }

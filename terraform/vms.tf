@@ -5,7 +5,7 @@ module "vm" {
   name        = each.key
   node_name   = local.vm_node[each.key]
   vm_id       = each.value.vm_id
-  template_id = var.vm_template_id
+  template_id = var.vm_template_ids[local.vm_node[each.key]]
 
   cores            = each.value.cores
   memory           = each.value.memory

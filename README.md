@@ -18,10 +18,14 @@ unifi/       Docker Compose for the UniFi Network Application, on its own VM
 
 ## Bringing it up, in order
 
-**1. Base template.** Once, and again whenever you want to rebase the image:
+**1. Base template**, one per PVE node that runs VMs, since a template on local storage cannot
+be cloned across nodes and vmids are cluster-unique. Once, and again whenever you want to rebase
+the image. The vmids have to match `vm_template_ids` in `terraform/fleet.auto.tfvars`:
 
 ```bash
 ssh root@pve "CI_PASSWORD='...' SSH_PUBKEY='$(cat ~/.ssh/id_ed25519.pub)' bash -s" \
+  < scripts/build-debian13-template.sh
+ssh root@pve02 "VMID=9001 CI_PASSWORD='...' SSH_PUBKEY='$(cat ~/.ssh/id_ed25519.pub)' bash -s" \
   < scripts/build-debian13-template.sh
 ```
 
@@ -58,10 +62,10 @@ make inventory  regenerate ansible/inventory.ini
 make deps       install the Ansible collections
 make ping       check the nodes answer over SSH
 make site       bootstrap the k3s cluster
+make labels     reconcile the k3s node labels from the fleet
 make fmt        format the Terraform files
 make validate   validate the configuration
 ```
-
 ## Secrets
 
 Nothing sensitive is committed. What stays out of the repo (see `.gitignore`):

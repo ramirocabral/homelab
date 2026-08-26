@@ -24,11 +24,22 @@
     name: iscsi_tcp
     state: present
 
+- name: Resolve the data disk behind its stable by-id path
+  ansible.builtin.command: "readlink -f {{ longhorn_device }}"
+  register: longhorn_disk
+  changed_when: false
+
+- name: Refuse to touch a partitioned disk
+  ansible.builtin.assert:
+    that: ansible_devices[longhorn_disk.stdout | basename].partitions | length == 0
+    fail_msg: >-
+      {{ longhorn_device }} resolves to {{ longhorn_disk.stdout }}, which is partitioned.
+      That is not the empty scsi1 data disk, and formatting it would destroy the node.
+
 - name: Create ext4 filesystem on the Longhorn data disk
   community.general.filesystem:
     fstype: ext4
     dev: "{{ longhorn_device }}"
-    # never reformat a disk that already carries a filesystem.
     force: false
 
 - name: Get UUID of the Longhorn data disk

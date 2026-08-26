@@ -1,0 +1,3 @@
+---
+gpu_render_node: /dev/dri/renderD128
+gpu_render_gid: 991

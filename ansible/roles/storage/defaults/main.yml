@@ -1,4 +1,3 @@
 ---
-# scsi1 in terraform/fleet.auto.tfvars (data_disk) lands here as /dev/sdb.
-longhorn_device: /dev/sdb
+longhorn_device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
 longhorn_data_dir: /var/lib/longhorn

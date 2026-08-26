@@ -35,3 +35,23 @@ check "lab_resolvers_are_static" {
     error_message = "Every container named by var.lab_resolvers needs a static ip; other guests point their DNS at them."
   }
 }
+
+check "one_igpu_per_node" {
+  assert {
+    condition = alltrue([
+      for node in var.pve_nodes :
+      length([for k, n in var.k3s_nodes : k if n.igpu && local.k3s_node[k] == node]) <= 1
+    ])
+    error_message = "A PVE node has only one iGPU, so at most one k3s node per PVE host can set igpu = true."
+  }
+}
+
+check "nodes_have_a_template" {
+  assert {
+    condition = alltrue([
+      for n in distinct(concat(values(local.vm_node), values(local.k3s_node))) :
+      contains(keys(var.vm_template_ids), n)
+    ])
+    error_message = "Every PVE node running a VM needs an entry in var.vm_template_ids: build the template on it with scripts/build-debian13-template.sh."
+  }
+}
