@@ -95,6 +95,7 @@ variable "vms" {
     ip         = optional(string)        # null = DHCP
     resolver   = optional(string, "lab") # lab | upstream | host
     tags       = optional(list(string), [])
+    started    = optional(bool, true)
   }))
   description = "Standalone VMs, keyed by hostname"
 }
@@ -112,6 +113,7 @@ variable "k3s_nodes" {
     taint     = optional(bool, false)
     igpu      = optional(bool, false)
     labels    = optional(map(string), {})
+    started   = optional(bool, true)
   }))
   description = "k3s cluster nodes, keyed by node name. Label keys are prefixed with var.node_label_domain"
 

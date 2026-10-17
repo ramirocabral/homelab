@@ -21,6 +21,7 @@ module "k3s_node" {
   pool_id       = proxmox_virtual_environment_pool.prod.pool_id
   tags          = ["terraform", "k3s", each.value.role]
   agent_enabled = true
+  started       = each.value.started
 }
 
 resource "local_file" "ansible_inventory" {

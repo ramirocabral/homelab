@@ -67,6 +67,7 @@ vms = {
     os_disk = 20
     ip      = "192.168.9.55"
     tags    = ["unifi"]
+    started = false
   }
 }
 

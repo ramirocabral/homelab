@@ -21,4 +21,5 @@ module "vm" {
   pool_id       = proxmox_virtual_environment_pool.prod.pool_id
   tags          = concat(local.base_tags, each.value.tags)
   agent_enabled = true
+  started       = each.value.started
 }

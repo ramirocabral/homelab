@@ -21,6 +21,8 @@ resource "proxmox_virtual_environment_vm" "this" {
   migrate   = var.migrate
   tags      = var.tags
   pool_id   = var.pool_id
+  started   = var.started
+  on_boot   = var.started
 
   clone {
     vm_id = var.template_id

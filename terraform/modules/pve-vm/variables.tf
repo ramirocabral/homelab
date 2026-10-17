@@ -114,3 +114,9 @@ variable "migrate" {
   description = "Migrate the VM when node_name changes instead of destroying and re-creating it"
   default     = true
 }
+
+variable "started" {
+  type        = bool
+  description = "Keep the VM running and start it on host boot. false = shut it down and leave it off."
+  default     = true
+}
