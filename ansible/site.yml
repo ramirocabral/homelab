@@ -23,6 +23,7 @@
 
 - name: Longhorn storage prerequisites (nodes with a data disk)
   hosts: agent
+  tags: storage
   roles:
     - role: storage
       when: longhorn_data | bool

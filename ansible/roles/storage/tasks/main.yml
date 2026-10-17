@@ -41,6 +41,7 @@
     fstype: ext4
     dev: "{{ longhorn_device }}"
     force: false
+    resizefs: true
 
 - name: Get UUID of the Longhorn data disk
   ansible.builtin.command: "blkid -s UUID -o value {{ longhorn_device }}"

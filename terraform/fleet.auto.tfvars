@@ -90,7 +90,7 @@ k3s_nodes = {
     cores     = 2
     memory    = 8192
     os_disk   = 20
-    data_disk = 70
+    data_disk = 100
     role      = "agent"
   }
 
@@ -101,7 +101,7 @@ k3s_nodes = {
     cores     = 2
     memory    = 8192
     os_disk   = 20
-    data_disk = 70
+    data_disk = 100
     role      = "agent"
   }
 
@@ -112,7 +112,7 @@ k3s_nodes = {
     cores     = 2
     memory    = 8192
     os_disk   = 20
-    data_disk = 70
+    data_disk = 100
     role      = "agent"
     igpu      = true
     labels = {
