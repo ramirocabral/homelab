@@ -79,7 +79,7 @@ k3s_nodes = {
     ip      = "192.168.9.21"
     cores   = 2
     memory  = 6144
-    os_disk = 20
+    os_disk = 30
     role    = "server"
     taint   = true
   }
@@ -89,7 +89,7 @@ k3s_nodes = {
     ip        = "192.168.9.22"
     cores     = 2
     memory    = 8192
-    os_disk   = 20
+    os_disk   = 40
     data_disk = 100
     role      = "agent"
   }
@@ -100,7 +100,7 @@ k3s_nodes = {
     ip        = "192.168.9.23"
     cores     = 2
     memory    = 8192
-    os_disk   = 20
+    os_disk   = 40
     data_disk = 100
     role      = "agent"
   }
@@ -111,7 +111,7 @@ k3s_nodes = {
     ip        = "192.168.9.24"
     cores     = 2
     memory    = 8192
-    os_disk   = 20
+    os_disk   = 40
     data_disk = 100
     role      = "agent"
     igpu      = true
