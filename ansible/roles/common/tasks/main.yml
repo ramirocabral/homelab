@@ -55,3 +55,24 @@
     name: qemu-guest-agent
     enabled: true
     state: "{{ 'started' if qga_channel.stat.exists else omit }}"
+
+- name: Find the root filesystem
+  ansible.builtin.set_fact:
+    root_mount: "{{ ansible_mounts | selectattr('mount', 'equalto', '/') | first }}"
+
+- name: Find the disk behind the root filesystem
+  ansible.builtin.command: "lsblk -no PKNAME {{ root_mount.device }}"
+  register: root_disk
+  changed_when: false
+  check_mode: false
+
+- name: Grow the root partition to fill its disk
+  ansible.builtin.command: "growpart /dev/{{ root_disk.stdout }} {{ root_mount.device | regex_search('[0-9]+$') }}"
+  register: growpart
+  changed_when: growpart.rc == 0
+  failed_when: growpart.rc != 0 and 'NOCHANGE' not in growpart.stdout
+
+- name: Grow the root filesystem
+  ansible.builtin.command: "resize2fs {{ root_mount.device }}"
+  register: resize2fs
+  changed_when: "'Nothing to do' not in resize2fs.stderr"
