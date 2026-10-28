@@ -1,9 +1,12 @@
 TF := terraform -chdir=terraform
 
-.PHONY: help fmt validate plan apply inventory deps ping site labels
+.PHONY: help init fmt validate plan apply inventory deps ping site labels
 
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t20
+
+init: ## Initialize Terraform against the Garage state backend
+	$(TF) init -backend-config=backend.hcl
 
 fmt: ## Format all Terraform files
 	$(TF) fmt -recursive

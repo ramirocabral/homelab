@@ -1,0 +1,7 @@
+# Copy to backend.hcl and fill in the Garage key, then: make init
+
+# Generate on the NAS with:
+#   /garage key create tfstate
+#   /garage bucket allow --read --write tfstate --key tfstate
+access_key = "GKxxxxxxxxxxxxxxxxxxxxxxxx"
+secret_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

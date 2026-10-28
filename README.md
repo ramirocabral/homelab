@@ -31,9 +31,11 @@ ssh root@pve02 "VMID=9001 CI_PASSWORD='...' SSH_PUBKEY='$(cat ~/.ssh/id_ed25519.
 
 **2. Provisioning.** Copy `terraform/terraform.tfvars.example` to `terraform.tfvars` and
 fill in the secrets. Everything that isn't a secret already lives in
-`terraform/fleet.auto.tfvars`.
+`terraform/fleet.auto.tfvars`. The state lives in the `tfstate` bucket on Garage, so also copy
+`terraform/backend.hcl.example` to `backend.hcl` with the bucket's key.
 
 ```bash
+make init     # once per checkout
 make plan     # review first
 make apply
 ```
@@ -56,6 +58,7 @@ installed after the playbook — see `ansible/README.md`. From there on, Argo CD
 ## Commands
 
 ```
+make init       initialize Terraform against the Garage state backend
 make plan       show what Terraform would change (read-only)
 make apply      apply it
 make inventory  regenerate ansible/inventory.ini
@@ -73,5 +76,15 @@ Nothing sensitive is committed. What stays out of the repo (see `.gitignore`):
 | File | What it is |
 |---|---|
 | `terraform/terraform.tfvars` | Proxmox API token and PBS credentials |
-| `terraform/*.tfstate*` | State, which stores those same values in cleartext |
+| `terraform/backend.hcl` | Garage access key for the state bucket |
+| `tfstate/lab/terraform.tfstate` on Garage | State, which stores those same values in cleartext |
 | `ansible/kubeconfig` | k3s cluster-admin credential |
+
+## Decisions
+
+- **Terraform state on Garage (S3 backend), on the TrueNAS.** It lives outside everything this
+  repo provisions: the `kubernetes` backend would put the state inside the cluster Terraform
+  itself creates. Garage has no object versioning, so there is no state history. There is no
+  state locking: Garage ignores the conditional writes
+  `use_lockfile` relies on, so two concurrent runs both take the lock and the second one
+  overwrites it. Acceptable with a single operator; don't run two `apply` at once.
