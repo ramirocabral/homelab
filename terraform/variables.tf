@@ -58,7 +58,7 @@ variable "lan_gateway" {
 
 variable "dns_fallback_servers" {
   type        = list(string)
-  description = "Public resolvers, used behind the lab resolver and by the lab resolver itself"
+  description = "Public resolvers, used by the lab resolvers themselves"
 }
 
 variable "lab_resolvers" {

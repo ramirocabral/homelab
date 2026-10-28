@@ -18,11 +18,12 @@ locals {
   lab_resolver_ips = [for k in var.lab_resolvers : var.containers[k].ip]
 
   # Named resolver profiles a guest can pick from:
-  #   lab      -> lab DNS first, public upstreams as fallback
+  #   lab      -> lab DNS only; resolved treats every listed server as equivalent and
+  #               sticks to a public one after a failover, losing the internal zone
   #   upstream -> public upstreams only (the lab resolvers themselves)
   #   host     -> inherit whatever the PVE host hands down
   resolvers = {
-    lab      = slice(concat(local.lab_resolver_ips, var.dns_fallback_servers), 0, 3)
+    lab      = local.lab_resolver_ips
     upstream = var.dns_fallback_servers
     host     = []
   }
