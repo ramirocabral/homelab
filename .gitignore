@@ -1,5 +1,5 @@
 # Claude Code local settings (can contain pasted credentials)
-.claude/settings.local.json
+.claude
 CLAUDE.md
 
 # Terraform: secrets, state and provider cache. The lock file IS committed.
