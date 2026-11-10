@@ -1,0 +1,14 @@
+---
+# the rest is in secrets.yml (gitignored)
+
+vps_wg_port: 51820
+vps_wg_address: 192.168.11.2
+vps_wg_peer_address: 192.168.11.1
+vps_wg_allowed_ips:
+  - 192.168.11.1/32
+  - 192.168.9.0/24
+  - 192.168.10.0/24
+
+vps_gatus_version: v5.38.0
+vps_node_exporter_version: v1.12.1
+

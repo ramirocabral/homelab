@@ -1,0 +1,137 @@
+---
+- name: Check the required vars are set
+  ansible.builtin.assert:
+    that:
+      - vps_wg_peer_public_key | default('') | length > 0
+      - vps_telegram_chat_id | default('') | length > 0
+      - vps_telegram_bot_token | default('') | length > 0
+      - vps_gatus_heartbeat_token | default('') | length > 0
+      - vps_home_ddns | default('') | length > 0
+    fail_msg: Missing vars in group_vars/vps/secrets.yml.
+    quiet: true
+
+- name: Install packages
+  ansible.builtin.dnf:
+    name:
+      - nftables
+      - wireguard-tools
+      - podman
+      - dnf-automatic
+    state: present
+
+- name: Mask rpcbind
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+    masked: true
+  loop:
+    - rpcbind.socket
+    - rpcbind.service
+
+- name: Drop the duplicated swapfile line from fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^(/\.swapfile\s.*\n)(?:/\.swapfile\s.*\n)+'
+    replace: '\1'
+
+- name: Install security and bugfix updates automatically
+  ansible.builtin.systemd_service:
+    name: dnf-automatic-install.timer
+    enabled: true
+    state: started
+
+- name: Firewall rules
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/sysconfig/nftables.conf
+    mode: "0600"
+    validate: nft -c -f %s
+  notify: Reload nftables
+
+- name: Enable nftables
+  ansible.builtin.systemd_service:
+    name: nftables
+    enabled: true
+    state: started
+
+- name: WireGuard config directory
+  ansible.builtin.file:
+    path: /etc/wireguard
+    state: directory
+    mode: "0700"
+
+- name: Generate the WireGuard private key
+  ansible.builtin.shell: umask 077 && wg genkey > /etc/wireguard/wg0.key
+  args:
+    creates: /etc/wireguard/wg0.key
+
+- name: Read the WireGuard public key
+  ansible.builtin.command: sh -c 'wg pubkey < /etc/wireguard/wg0.key'
+  register: vps_wg_public_key
+  changed_when: false
+  check_mode: false
+
+- name: WireGuard config
+  ansible.builtin.template:
+    src: wg0.conf.j2
+    dest: /etc/wireguard/wg0.conf
+    mode: "0600"
+  notify: Restart wireguard
+
+- name: Enable the tunnel
+  ansible.builtin.systemd_service:
+    name: wg-quick@wg0
+    enabled: true
+    state: started
+
+- name: Gatus config directory
+  ansible.builtin.file:
+    path: /etc/gatus
+    state: directory
+    mode: "0755"
+
+- name: Gatus config
+  ansible.builtin.template:
+    src: gatus.yaml.j2
+    dest: /etc/gatus/config.yaml
+    mode: "0644"
+  notify: Restart gatus
+
+- name: Gatus secrets
+  ansible.builtin.template:
+    src: gatus.env.j2
+    dest: /etc/gatus/gatus.env
+    mode: "0600"
+  notify: Restart gatus
+
+- name: Gatus data directory
+  ansible.builtin.file:
+    path: /var/lib/gatus
+    state: directory
+    owner: "65534"
+    group: "65534"
+    mode: "0750"
+
+- name: Quadlet units
+  ansible.builtin.template:
+    src: "{{ item }}.container.j2"
+    dest: "/etc/containers/systemd/{{ item }}.container"
+    mode: "0644"
+  loop:
+    - gatus
+    - node-exporter
+  notify: Restart {{ item }}
+
+- name: Start the containers
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    daemon_reload: true
+  loop:
+    - gatus
+    - node-exporter
+
+- name: WireGuard public key
+  ansible.builtin.debug:
+    msg: "VPS WireGuard public key: {{ vps_wg_public_key.stdout }}"

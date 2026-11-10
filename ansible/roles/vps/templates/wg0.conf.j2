@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+[Interface]
+Address = {{ vps_wg_address }}/30
+ListenPort = {{ vps_wg_port }}
+MTU = 1420
+PostUp = wg set %i private-key /etc/wireguard/%i.key
+
+[Peer]
+PublicKey = {{ vps_wg_peer_public_key }}
+AllowedIPs = {{ vps_wg_allowed_ips | join(', ') }}

@@ -1,0 +1,24 @@
+#!/usr/sbin/nft -f
+# {{ ansible_managed }}
+
+table inet host
+delete table inet host
+
+table inet host {
+	chain input {
+		type filter hook input priority filter; policy drop;
+
+		ct state established,related accept
+		ct state invalid drop
+		iif lo accept
+
+		ip saddr 169.254.0.0/16 accept
+		udp sport 67 udp dport 68 accept
+		meta l4proto { icmp, ipv6-icmp } accept
+
+		tcp dport 22 accept
+		udp dport {{ vps_wg_port }} accept
+
+		iifname "wg0" tcp dport { 8080, 9100 } accept
+	}
+}

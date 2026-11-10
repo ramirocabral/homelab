@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Prometheus node exporter
+
+[Container]
+Image=quay.io/prometheus/node-exporter:{{ vps_node_exporter_version }}
+ContainerName=node-exporter
+Network=host
+PodmanArgs=--pid=host
+SecurityLabelDisable=true
+Volume=/:/host:ro,rslave
+Exec=--path.rootfs=/host
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

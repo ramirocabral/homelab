@@ -1,0 +1,48 @@
+# {{ ansible_managed }}
+metrics: true
+
+storage:
+  type: sqlite
+  path: /data/gatus.db
+
+alerting:
+  telegram:
+    token: "${TELEGRAM_BOT_TOKEN}"
+    id: "{{ vps_telegram_chat_id }}"
+    default-alert:
+      enabled: true
+      send-on-resolved: true
+      failure-threshold: 3
+      success-threshold: 2
+
+endpoints:
+  - name: wan
+    group: home
+    url: icmp://{{ vps_home_ddns }}
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: telegram
+        description: "Home does not answer ping"
+
+  - name: tunnel
+    group: home
+    url: icmp://{{ vps_wg_peer_address }}
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: telegram
+        description: "WireGuard tunnel is down"
+
+external-endpoints:
+  - name: alertmanager-watchdog
+    group: home
+    token: "${GATUS_HEARTBEAT_TOKEN}"
+    heartbeat:
+      interval: 5m
+    alerts:
+      - type: telegram
+        failure-threshold: 1
+        description: "No Watchdog from Alertmanager in 5m"

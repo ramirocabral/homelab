@@ -16,6 +16,7 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 | pve | Intel i3-6100T, 24 GB RAM, 500 GB SSD | Proxmox VE node |
 | pve02 | Intel i5-7500T, 24 GB RAM, 500 GB NVMe | Proxmox VE node, iGPU passed to a k3s worker |
 | NAS | AMD Ryzen 5 1600, 16 GB RAM, 3× 4 TB HDD, 240 GB SSD | TrueNAS SCALE |
+| vps | 4 ARM cores, 24 GB RAM | Off-site monitoring, outside the cluster |
 
 ## Services
 
@@ -52,10 +53,11 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 ## Network topology
 
 ```text
-[ Internet ]
-      │
-      ▼
-[ MikroTik ] ── WireGuard (remote access)
+[ Internet ] ─────────────── [ VPS ]  Gatus, node-exporter
+      │                          ▲
+      ▼                          │ WireGuard
+[ MikroTik ] ────────────────────┘
+      │      ── WireGuard (remote access)
       │
       ├──> [ pve ]   ──> k3s nodes, DNS, reverse proxy
       ├──> [ pve02 ] ──> k3s nodes, DNS
@@ -65,7 +67,7 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 ## Repository structure
 
 ```text
-lab/
+homelab/
 ├── terraform/   VMs and containers on Proxmox
 ├── ansible/     k3s bootstrap
 ├── scripts/     Helper scripts for the Proxmox nodes

@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Gatus
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=ghcr.io/twin/gatus:{{ vps_gatus_version }}
+ContainerName=gatus
+Network=host
+# non-root so ICMP uses unprivileged pings
+User=65534:65534
+EnvironmentFile=/etc/gatus/gatus.env
+Volume=/etc/gatus/config.yaml:/config/config.yaml:ro,Z
+Volume=/var/lib/gatus:/data:Z
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
