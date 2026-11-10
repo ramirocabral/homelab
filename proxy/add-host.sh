@@ -15,7 +15,7 @@ set -euo pipefail
 FQDN="${1:?usage: add-host.sh <fqdn> <upstream-url>   e.g. truenas.cabral.net.ar https://192.168.9.8}"
 UPSTREAM="${2:?usage: add-host.sh <fqdn> <upstream-url>   e.g. truenas.cabral.net.ar https://192.168.9.8}"
 : "${CLOUDFLARE_DNS_TOKEN:?set CLOUDFLARE_DNS_TOKEN to a Cloudflare token with Zone.DNS:Edit}"
-EMAIL="${ACME_EMAIL:-ramirocabral04@gmail.com}"
+EMAIL="${ACME_EMAIL:?set ACME_EMAIL}"
 
 # Reuse the Cloudflare creds bootstrap.sh already wrote; recreate if missing.
 CRED=/root/.secrets/certbot/cloudflare.ini

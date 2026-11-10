@@ -10,7 +10,7 @@
 set -euo pipefail
 
 : "${CLOUDFLARE_DNS_TOKEN:?set CLOUDFLARE_DNS_TOKEN to a Cloudflare token with Zone.DNS:Edit}"
-EMAIL="${ACME_EMAIL:-ramirocabral04@gmail.com}"
+EMAIL="${ACME_EMAIL:?set ACME_EMAIL}"
 CERT_NAME="cabral-wildcard"
 DOMAIN="*.cabral.net.ar"
 
