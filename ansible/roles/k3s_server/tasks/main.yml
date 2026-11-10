@@ -6,6 +6,7 @@
       --flannel-backend=none
       --disable-network-policy
       --disable-kube-proxy
+      --secrets-encryption
       {% for c in k3s_disable %}--disable {{ c }} {% endfor %}
       --write-kubeconfig-mode 644
       --tls-san {{ k3s_server_ip }}
