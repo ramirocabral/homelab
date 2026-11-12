@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+[Unit]
+Description=restic rest-server
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=/data/restic
+
+[Container]
+Image=docker.io/restic/rest-server:{{ vps_rest_server_version }}
+ContainerName=rest-server
+Network=host
+User={{ vps_restic_uid }}:{{ vps_restic_uid }}
+Volume=/data/restic:/data:z
+Volume=/etc/rest-server/htpasswd:/etc/rest-server/htpasswd:ro,z
+Exec=rest-server --path /data --htpasswd-file /etc/rest-server/htpasswd --private-repos
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

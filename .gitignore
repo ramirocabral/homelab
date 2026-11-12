@@ -16,5 +16,5 @@ ansible/inventory.ini
 # Fetched from the k3s server: cluster-admin credentials
 ansible/kubeconfig
 
-# VPS secrets
-ansible/group_vars/vps/secrets.yml
+# Ansible secrets
+ansible/group_vars/*/secrets.yml

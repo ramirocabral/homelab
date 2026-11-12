@@ -1,0 +1,5 @@
+---
+- name: Backups
+  hosts: restic
+  roles:
+    - restic

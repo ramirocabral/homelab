@@ -1,0 +1,73 @@
+---
+- name: Check the required vars are set
+  ansible.builtin.assert:
+    that:
+      - restic_name is defined
+      - restic_server is defined
+      - restic_password | default('') | length > 0
+      - restic_gatus_token | default('') | length > 0
+      - restic_rest_passwords[restic_name] | default('') | length > 0
+      - restic_env.values() | select('equalto', '') | list | length == 0
+    fail_msg: Missing vars in group_vars/offsite/secrets.yml.
+    quiet: true
+
+- name: Install packages
+  ansible.builtin.apt:
+    name: "{{ ['restic', 'curl'] + restic_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Config directory
+  ansible.builtin.file:
+    path: /etc/restic
+    state: directory
+    mode: "0700"
+
+- name: Repository password
+  ansible.builtin.copy:
+    content: "{{ restic_password }}"
+    dest: /etc/restic/password
+    mode: "0600"
+  no_log: true
+
+- name: Environment
+  ansible.builtin.template:
+    src: env.j2
+    dest: /etc/restic/env
+    mode: "0600"
+  no_log: true
+
+- name: Backup script
+  ansible.builtin.template:
+    src: restic-backup.j2
+    dest: /usr/local/bin/restic-backup
+    mode: "0755"
+
+- name: Systemd units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    mode: "0644"
+  loop:
+    - restic-backup.service
+    - restic-backup.timer
+  notify: Restart the timer
+
+- name: Check the repository exists
+  ansible.builtin.shell: set -a && . /etc/restic/env && restic cat config
+  register: restic_repo
+  changed_when: false
+  failed_when: restic_repo.rc not in [0, 10]
+  check_mode: false
+
+- name: Initialize the repository
+  ansible.builtin.shell: set -a && . /etc/restic/env && restic init
+  when: restic_repo.rc == 10
+
+- name: Enable the timer
+  ansible.builtin.systemd_service:
+    name: restic-backup.timer
+    enabled: true
+    state: started
+    daemon_reload: true

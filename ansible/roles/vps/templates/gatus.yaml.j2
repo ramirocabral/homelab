@@ -46,3 +46,25 @@ external-endpoints:
       - type: telegram
         failure-threshold: 1
         description: "No Watchdog from Alertmanager in 5m"
+{% for name in restic_rest_passwords %}
+
+  - name: {{ name }}
+    group: backups
+    token: "${BACKUP_HEARTBEAT_TOKEN}"
+    heartbeat:
+      interval: 26h
+    alerts:
+      - type: telegram
+        failure-threshold: 1
+        description: "No successful {{ name }} backup in 26h"
+{% endfor %}
+
+  - name: snapshots
+    group: backups
+    token: "${BACKUP_HEARTBEAT_TOKEN}"
+    heartbeat:
+      interval: 26h
+    alerts:
+      - type: telegram
+        failure-threshold: 1
+        description: "No snapshot of the restic repos in 26h"

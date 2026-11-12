@@ -1,0 +1,6 @@
+---
+restic_on_calendar: "*-*-* 04:00"
+restic_packages: []
+restic_env: {}
+restic_pre: []
+restic_paths: []

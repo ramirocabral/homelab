@@ -1,6 +1,6 @@
 TF := terraform -chdir=terraform
 
-.PHONY: help init fmt validate plan apply inventory deps ping site labels vps
+.PHONY: help init fmt validate plan apply inventory deps ping site labels vps backup
 
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t20
@@ -37,4 +37,8 @@ labels: ## Reconcile the k3s node labels from the Terraform fleet
 	cd ansible && ansible-playbook site.yml --tags labels
 
 vps: ## Configure the VPS
-	cd ansible && ansible-playbook -i vps.ini vps.yml
+	cd ansible && ansible-playbook -i offsite.ini vps.yml
+
+backup: ## Configure the restic backups to the VPS
+	cd ansible && ansible-playbook -i offsite.ini backup.yml
+

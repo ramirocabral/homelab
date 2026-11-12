@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Snapshot of the restic repos
+RequiresMountsFor=/data
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/gatus/gatus.env
+ExecStart=/usr/local/bin/restic-snapshot
+Nice=10
+IOSchedulingClass=idle

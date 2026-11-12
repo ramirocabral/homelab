@@ -1,0 +1,17 @@
+---
+restic_name: nas
+restic_packages:
+  - rclone
+restic_env:
+  RCLONE_CONFIG_GARAGE_TYPE: s3
+  RCLONE_CONFIG_GARAGE_PROVIDER: Other
+  RCLONE_CONFIG_GARAGE_ENDPOINT: http://192.168.9.5:30188
+  RCLONE_CONFIG_GARAGE_REGION: garage
+  RCLONE_CONFIG_GARAGE_ACCESS_KEY_ID: "{{ restic_garage_access_key_id }}"
+  RCLONE_CONFIG_GARAGE_SECRET_ACCESS_KEY: "{{ restic_garage_secret_access_key }}"
+restic_pre:
+  - rclone sync garage:longhorn-backups /var/lib/garage-mirror/longhorn-backups
+  - rclone sync garage:tfstate /var/lib/garage-mirror/tfstate
+restic_paths:
+  - /mnt/shared
+  - /var/lib/garage-mirror

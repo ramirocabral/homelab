@@ -11,4 +11,8 @@ vps_wg_allowed_ips:
 
 vps_gatus_version: v5.38.0
 vps_node_exporter_version: v1.12.1
+vps_rest_server_version: 0.14.0
+
+vps_restic_uid: 900
+vps_restic_snapshots: 14
 

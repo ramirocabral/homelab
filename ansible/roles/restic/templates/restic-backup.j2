@@ -1,0 +1,19 @@
+#!/bin/bash
+# {{ ansible_managed }}
+set -euo pipefail
+set -a
+. /etc/restic/env
+set +a
+
+report() {
+  curl -fsS -m 30 -o /dev/null -X POST -H "Authorization: Bearer $GATUS_TOKEN" "$GATUS_URL?success=$1${2:+&error=$2}" || true
+}
+trap 'report false "restic+backup+failed"' ERR
+
+{% for command in restic_pre %}
+{{ command }}
+{% endfor %}
+restic backup --tag scheduled {{ restic_paths | join(' ') }}
+restic forget --tag scheduled --prune --keep-daily 7 --keep-weekly 4 --keep-monthly 12
+
+report true

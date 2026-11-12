@@ -10,6 +10,14 @@
     fail_msg: Missing vars in group_vars/vps/secrets.yml.
     quiet: true
 
+- name: Check the restic vars are set
+  ansible.builtin.assert:
+    that:
+      - restic_gatus_token | default('') | length > 0
+      - restic_rest_passwords | default({}) | length > 0
+    fail_msg: Missing vars in group_vars/offsite/secrets.yml.
+    quiet: true
+
 - name: Install packages
   ansible.builtin.dnf:
     name:
@@ -17,6 +25,7 @@
       - wireguard-tools
       - podman
       - dnf-automatic
+      - httpd-tools
     state: present
 
 - name: Mask rpcbind
@@ -113,6 +122,88 @@
     group: "65534"
     mode: "0750"
 
+- name: restic group
+  ansible.builtin.group:
+    name: restic
+    gid: "{{ vps_restic_uid }}"
+    system: true
+
+- name: restic user
+  ansible.builtin.user:
+    name: restic
+    uid: "{{ vps_restic_uid }}"
+    group: restic
+    system: true
+    shell: /sbin/nologin
+    home: /data/restic
+    create_home: false
+
+- name: restic data directory
+  ansible.builtin.file:
+    path: /data/restic
+    state: directory
+    owner: restic
+    group: restic
+    mode: "0700"
+
+- name: Snapshot directory
+  ansible.builtin.file:
+    path: /data/snapshots
+    state: directory
+    mode: "0700"
+
+- name: Snapshot script
+  ansible.builtin.template:
+    src: restic-snapshot.j2
+    dest: /usr/local/bin/restic-snapshot
+    mode: "0755"
+
+- name: Snapshot units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    mode: "0644"
+  loop:
+    - restic-snapshot.service
+    - restic-snapshot.timer
+  notify: Restart the snapshot timer
+
+- name: Enable the snapshot timer
+  ansible.builtin.systemd_service:
+    name: restic-snapshot.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: rest-server config directory
+  ansible.builtin.file:
+    path: /etc/rest-server
+    state: directory
+    mode: "0755"
+
+- name: rest-server htpasswd file
+  ansible.builtin.copy:
+    content: ""
+    dest: /etc/rest-server/htpasswd
+    force: false
+    owner: root
+    group: restic
+    mode: "0640"
+
+- name: rest-server users
+  ansible.builtin.shell: >-
+    printf %s "$PASSWORD" | htpasswd -v -i /etc/rest-server/htpasswd {{ item.key }} 2>/dev/null
+    || { printf %s "$PASSWORD" | htpasswd -B -i /etc/rest-server/htpasswd {{ item.key }} && echo updated; }
+  environment:
+    PASSWORD: "{{ item.value }}"
+  loop: "{{ restic_rest_passwords | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: vps_rest_users
+  changed_when: "'updated' in vps_rest_users.stdout"
+  no_log: true
+  notify: Restart rest-server
+
 - name: Quadlet units
   ansible.builtin.template:
     src: "{{ item }}.container.j2"
@@ -121,6 +212,7 @@
   loop:
     - gatus
     - node-exporter
+    - rest-server
   notify: Restart {{ item }}
 
 - name: Start the containers
@@ -131,6 +223,7 @@
   loop:
     - gatus
     - node-exporter
+    - rest-server
 
 - name: WireGuard public key
   ansible.builtin.debug:
