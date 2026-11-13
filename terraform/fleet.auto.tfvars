@@ -58,18 +58,7 @@ containers = {
 
 # ---- Standalone VMs ---------------------------------------------------------
 
-vms = {
-  unifi = {
-    vm_id   = 112
-    cores   = 2
-    node    = "pve"
-    memory  = 4096
-    os_disk = 20
-    ip      = "192.168.9.55"
-    tags    = ["unifi"]
-    started = false
-  }
-}
+vms = {}
 
 # ---- k3s cluster ------------------------------------------------------------
 
