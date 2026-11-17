@@ -11,6 +11,8 @@ locals {
   k3s_labels = {
     for k, n in var.k3s_nodes : k => merge(
       { "${var.node_label_domain}/pve-node" = local.k3s_node[k] },
+      # Longhorn spreads replicas across zones, so a PVE host is a zone
+      { "topology.kubernetes.io/zone" = local.k3s_node[k] },
       { for lk, lv in n.labels : "${var.node_label_domain}/${lk}" => lv },
     )
   }
