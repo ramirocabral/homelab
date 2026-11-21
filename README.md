@@ -46,7 +46,7 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 - **Sonarr, Radarr, Prowlarr, Bazarr, qBittorrent**: media automation.
 - **Seerr**: movie and series requests.
 - **Calibre-Web Automated**: ebook library.
-- **Karakeep, Obsidian LiveSync**: bookmarks and note sync.
+- **WebDAV for Floccus, Obsidian LiveSync**: bookmark and note sync.
 
 ### Storage and backups
 
