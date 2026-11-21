@@ -1,6 +1,6 @@
 TF := terraform -chdir=terraform
 
-.PHONY: help init fmt validate plan apply inventory deps ping site labels vps backup
+.PHONY: help init fmt validate plan apply inventory deps ping site labels vps backup edge
 
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t20
@@ -42,3 +42,5 @@ vps: ## Configure the VPS
 backup: ## Configure the restic backups to the VPS
 	cd ansible && ansible-playbook -i offsite.ini backup.yml
 
+edge: ## Configure the edge proxy VM (Nginx Proxy Manager)
+	cd ansible && ansible-playbook -i edge.ini edge.yml

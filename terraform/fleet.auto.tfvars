@@ -25,15 +25,6 @@ backup_schedule = "02:00"
 # ---- LXC containers ---------------------------------------------------------
 
 containers = {
-  proxy = {
-    vm_id    = 110
-    cores    = 1
-    memory   = 512
-    disk     = 4
-    resolver = "host"
-    tags     = ["proxy"]
-  }
-
   ns1 = {
     vm_id    = 111
     cores    = 1
@@ -58,7 +49,16 @@ containers = {
 
 # ---- Standalone VMs ---------------------------------------------------------
 
-vms = {}
+vms = {
+  edge = {
+    vm_id  = 131
+    node   = "pve02"
+    cores  = 1
+    memory = 1024
+    ip     = "192.168.9.60"
+    tags   = ["proxy"]
+  }
+}
 
 # ---- k3s cluster ------------------------------------------------------------
 

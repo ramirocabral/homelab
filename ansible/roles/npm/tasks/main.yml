@@ -1,0 +1,72 @@
+---
+- name: Check the required vars are set
+  ansible.builtin.assert:
+    that:
+      - npm_ssh_cidrs | length > 0
+      - npm_admin_cidrs | length > 0
+    fail_msg: Missing vars in group_vars/proxy.
+    quiet: true
+
+# rc 2 is "done, degraded": the PVE user-data trips a deprecation warning
+- name: Wait for cloud-init to finish
+  ansible.builtin.command: cloud-init status --wait
+  register: npm_cloud_init
+  changed_when: false
+  failed_when: npm_cloud_init.rc not in [0, 2]
+
+- name: SSH accepts keys only
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/10-keys-only.conf
+    content: |
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+    mode: "0644"
+  notify: Reload ssh
+
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - nftables
+      - podman
+    state: present
+    update_cache: true
+
+- name: Firewall rules
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    mode: "0755"
+    validate: nft -c -f %s
+  notify: Reload nftables
+
+- name: Enable nftables
+  ansible.builtin.systemd_service:
+    name: nftables
+    enabled: true
+    state: started
+
+- name: Data directories
+  ansible.builtin.file:
+    path: "{{ npm_data_dir }}/{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - data
+    - letsencrypt
+
+- name: Quadlet unit
+  ansible.builtin.template:
+    src: npm.container.j2
+    dest: /etc/containers/systemd/npm.container
+    mode: "0644"
+  notify: Restart npm
+
+- name: Start the container
+  ansible.builtin.systemd_service:
+    name: npm
+    state: started
+    daemon_reload: true
+
+- name: Admin UI
+  ansible.builtin.debug:
+    msg: "First login creates the admin: http://{{ ansible_host }}:81"

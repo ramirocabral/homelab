@@ -54,6 +54,14 @@ kubectl get nodes -o wide    # NotReady until Cilium is installed (expected)
 3. **ingress-nginx** (LoadBalancer → `.50`).
 4. **cert-manager** + a Cloudflare DNS-01 ClusterIssuer (wildcard `*.lab.cabral.net.ar`).
 
+## Edge proxy
+
+`edge.yml` configures the `edge` VM from `terraform/fleet.auto.tfvars`
+
+```bash
+make edge
+```
+
 ## Notes
 
 - Node labels are applied with `kubectl label`, not with k3s' `--node-label`: kubelet only honours
@@ -69,3 +77,6 @@ kubectl get nodes -o wide    # NotReady until Cilium is installed (expected)
   came up as `/dev/sda` and the OS disk as `/dev/sdb`), and attached Longhorn volumes show up as
   `/dev/sdc` and beyond, so the short names point at different disks on different nodes. The
   role also refuses to format a disk that has partitions.
+- The edge proxy is a VM, not an LXC: Nginx Proxy Manager only ships as a container image, and
+  containers nested in an LXC run on the host kernel through AppArmor, which PVE and runc updates
+  have broken before. Its UI on :81 is reachable only from the desktop and the WireGuard clients.

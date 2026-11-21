@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Nginx Proxy Manager
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=docker.io/jc21/nginx-proxy-manager:{{ npm_version }}
+ContainerName=npm
+Network=host
+Environment=TZ={{ npm_tz }}
+Volume={{ npm_data_dir }}/data:/data
+Volume={{ npm_data_dir }}/letsencrypt:/etc/letsencrypt
+HealthCmd=/usr/bin/check-health
+HealthInterval=30s
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

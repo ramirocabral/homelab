@@ -31,7 +31,7 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 ### Network
 
 - **Technitium**: internal DNS, two instances.
-- **Envoy Gateway / nginx**: reverse proxies, with Let's Encrypt certificates.
+- **Envoy Gateway / Nginx Proxy Manager**: reverse proxies, with Let's Encrypt certificates.
 - **WireGuard**: remote access.
 
 ### Monitoring
@@ -64,8 +64,8 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 [ MikroTik ] ────────────────────┘
       │      ── WireGuard (remote access)
       │
-      ├──> [ pve ]   ──> k3s nodes, DNS, reverse proxy
-      ├──> [ pve02 ] ──> k3s nodes, DNS
+      ├──> [ pve ]   ──> k3s nodes, DNS
+      ├──> [ pve02 ] ──> k3s nodes, DNS, reverse proxy
       └──> [ NAS ]   ──> NFS, S3, backups, quorum device
 ```
 
@@ -76,6 +76,5 @@ homelab/
 ├── terraform/   VMs and containers on Proxmox
 ├── ansible/     k3s bootstrap
 ├── scripts/     Helper scripts for the Proxmox nodes
-├── proxy/       Reverse proxy for the services outside the cluster
 └── docs/        Diagram
 ```

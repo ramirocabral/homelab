@@ -1,0 +1,14 @@
+---
+- name: Edge proxy
+  hosts: proxy
+  gather_facts: false
+  pre_tasks:
+    # Freshly cloned VMs may still be booting when Terraform hands off.
+    - name: Wait for SSH to come up
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts
+      ansible.builtin.setup:
+  roles:
+    - npm

@@ -1,0 +1,8 @@
+---
+npm_ssh_cidrs:
+  - 192.168.9.0/24
+  - 192.168.10.0/24
+
+npm_admin_cidrs:
+  - 192.168.9.2/32 # desktop
+  - 192.168.10.0/24 # WireGuard clients

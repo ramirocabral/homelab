@@ -1,0 +1,21 @@
+#!/usr/sbin/nft -f
+# {{ ansible_managed }}
+
+table inet host
+delete table inet host
+
+table inet host {
+	chain input {
+		type filter hook input priority filter; policy drop;
+
+		ct state established,related accept
+		ct state invalid drop
+		iif lo accept
+
+		meta l4proto { icmp, ipv6-icmp } accept
+
+		tcp dport { 80, 443 } accept
+		ip saddr { {{ npm_ssh_cidrs | join(', ') }} } tcp dport 22 accept
+		ip saddr { {{ npm_admin_cidrs | join(', ') }} } tcp dport 81 accept
+	}
+}
