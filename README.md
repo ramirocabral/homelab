@@ -37,8 +37,9 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 ### Monitoring
 
 - **Prometheus, Thanos, Loki, Grafana**: metrics, logs and dashboards.
+- **Blackbox exporter**: checks that every web UI, certificate and DNS server answers.
 - **Alertmanager**: alerts to Telegram.
-- **Gatus**: on the VPS, alerts when the lab, its alerting or the off-site backups stop answering.
+- **Gatus**: on the VPS, alerts when the lab, its alerting or the backups (Proxmox and off-site) stop answering.
 
 ### Media and apps
 

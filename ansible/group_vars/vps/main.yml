@@ -16,3 +16,7 @@ vps_rest_server_version: 0.14.0
 vps_restic_uid: 900
 vps_restic_snapshots: 14
 
+# Proxmox nodes that push a heartbeat to Gatus after their nightly vzdump
+vps_pve_backup_nodes:
+  - pve
+  - pve02
