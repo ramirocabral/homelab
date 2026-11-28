@@ -48,6 +48,7 @@ deployed from [homelab-gitops](https://github.com/ramirocabral/homelab-gitops) b
 - **Seerr**: movie and series requests.
 - **Calibre-Web Automated**: ebook library.
 - **WebDAV for Floccus, Obsidian LiveSync**: bookmark and note sync.
+- **Quartz**: the lab's wiki, published as a site on every push.
 
 ### Storage and backups
 
